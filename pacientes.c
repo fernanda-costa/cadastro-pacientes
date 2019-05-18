@@ -1,16 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct nodo_paciente{
     char nome[50];
     int telefone;
     int grauUrgencia;
     struct nodo_paciente *prox;
-} Paciente;
+} Paciente, *PONT;
 
-Paciente *criaPaciente() {
+typedef struct fila{
+    int quantidade;
+    PONT inicio, fim;
+} Fila;
+
+
+Paciente* criaPaciente() {
     Paciente *p;
-    p = (Paciente *) malloc(sizeof(Paciente));
+    p = (Paciente*) malloc(sizeof(Paciente));
 
     if(!p) {
         printf("Problema de alocao");
@@ -20,62 +27,88 @@ Paciente *criaPaciente() {
     return p;
 }
 
+void inicializaFila(Fila *fila){
+    fila->inicio = NULL;
+    fila->fim = NULL;
+    fila->quantidade = 0;
+}
 
-void cadastrarPaciente(Paciente **pacientes, char *nome, int telefone, int grauUrgencia){
-    Paciente *paciente;
-    paciente = criaPaciente();
+void exibirFila(Fila *fila){
+    PONT paciente = fila->inicio;
+    while(paciente != NULL){
+        printf("\nNome: %s", paciente->nome);
+        paciente = paciente->prox;
+    }
+}
+
+void cadastrarPaciente(Fila *fila, char *nome, int telefone, int grauUrgencia){
+    PONT paciente = criaPaciente();
     strcpy(paciente->nome, nome);
     paciente->grauUrgencia = grauUrgencia;
     paciente->telefone = telefone;
-    paciente->prox = *pacientes;
-    *pacientes = paciente;
-}
+    paciente->prox = NULL;
 
-void inicializaLista(Paciente **pacientes){
-    *pacientes = NULL;
-}
-
-void imprimeLista(Paciente *pacientes){
-Paciente *aux;
-    int i, j;
-    if(pacientes == NULL){
-        printf("\n A lista esta vazia!!");
+    if(fila->inicio == NULL){
+        fila->inicio = paciente;
+    } else {
+        fila->fim->prox = paciente;
     }
-    else{
-        for(aux = pacientes; aux != NULL; aux = aux->prox){
-            printf("%s ", aux->nome);
+    fila->fim = paciente;
+    fila->quantidade++;
+}
+void removerDaFila(Fila *fila){
+    if(fila->inicio == NULL){
+        return;
+    }
+    PONT paciente = fila->inicio;
+    fila->inicio = fila->inicio->prox;
+    free(paciente);
+    if(fila->inicio == NULL){
+        fila->fim = NULL;
+    }
+    fila->quantidade--;
+}
+void proximoLista(Fila *fila){
+    if(fila->inicio == NULL){
+        printf("A lista esta vazia. Nao ha proximo paciente.");
+        return;
+    }
+    PONT proxFila = fila->inicio;
+    printf("\n---------------------------\n");
+    printf("Nome: %s", proxFila->nome);
+    printf("\nTelefone: %d", proxFila->telefone);
+    printf("\nGrau de urgencia: %d", proxFila->grauUrgencia);
+    printf("\n---------------------------\n");
+
+}
+int buscarPaciente(Fila *fila, char *nome){
+    PONT paciente = fila->inicio;
+    int achou = 0, posicao = 1;
+    while(paciente != NULL){
+        if(strcmp(paciente->nome, nome) == 0){
+            printf("\nNome: %s", paciente->nome);
+            printf("\nTelefone: %d", paciente->telefone);
+            printf("\nGrau de urgencia: %d", paciente->grauUrgencia);
+            printf("\nPosicao: %d", posicao);
+           return 1;
         }
+        paciente = paciente->prox;
+        posicao++;
+    }
+    if(achou == 0){
+        return 0;
     }
 }
-Paciente* buscarPaciente(Paciente *pacientes, char *nome){
-Paciente *aux;
-    int i, j;
-    if(pacientes == NULL){
-        printf("\n A lista esta vazia!!");
-    }
-    else{
-        for(aux = pacientes; aux != NULL; aux = aux->prox){
-            if(!strcmp(aux->nome, nome)){
-                return aux;
-            }
-        }
-    }
 
-}
-Paciente* proximoPaciente(){}
-int verificaTamanhoFila(){}
-void removerPaciente(){}
+
 
 void main(){
 
-    Paciente *pacientes, *paciente;
-    inicializaLista(&pacientes);
-
-    int telefone, grauUrgencia;
-    char nome[50];
-
-
+    Fila fila;
+    inicializaFila(&fila);
+    int telefone, grauUrgencia; char nome[50];
     int opcao;
+
     do{
         do{
             printf("\n*************************************");
@@ -98,19 +131,24 @@ void main(){
                 scanf("%d", &telefone);
                 printf("Insira o grau de urgencia do paciente: ");
                 scanf("%d", &grauUrgencia);
-                cadastrarPaciente(&pacientes, nome, telefone, grauUrgencia);
-                imprimeLista(pacientes);
+                cadastrarPaciente(&fila, nome, telefone, grauUrgencia);
+                exibirFila(&fila);
             break;
             case 2:
                 printf("Insira o nome do paciente a ser pesquisado: ");
                 scanf("%s", &nome);
-                paciente = buscarPaciente(pacientes, nome);
-                if(!paciente){
-                    printf("O paciente n existe");
-                } else {
-                    printf("\n nome: %s", paciente->nome);
+                if(!buscarPaciente(&fila, nome)){
+                    printf("O paciente nao se encontra na fila.");
                 }
-
+            break;
+            case 3:
+                proximoLista(&fila);
+                removerDaFila(&fila);
+                exibirFila(&fila);
+            break;
+            case 4:
+                printf("Tamanho da fila: %d", fila.quantidade);
+            break;
         }
     }while(opcao != 0);
 }
