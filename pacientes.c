@@ -68,7 +68,7 @@ void removerDaFila(Fila *fila){
     }
     fila->quantidade--;
 }
-void proximoLista(Fila *fila){
+PONT proximoLista(Fila *fila){
     if(fila->inicio == NULL){
         printf("A lista esta vazia. Nao ha proximo paciente.");
         return;
@@ -79,8 +79,9 @@ void proximoLista(Fila *fila){
     printf("\nTelefone: %d", proxFila->telefone);
     printf("\nGrau de urgencia: %d", proxFila->grauUrgencia);
     printf("\n---------------------------\n");
-
+    return proxFila;
 }
+
 int buscarPaciente(Fila *fila, char *nome){
     PONT paciente = fila->inicio;
     int achou = 0, posicao = 1;
@@ -100,13 +101,24 @@ int buscarPaciente(Fila *fila, char *nome){
     }
 }
 
-
+void escreverArquivo(PONT paciente, FILE *arquivo){
+    arquivo = fopen ("pacientes-operados.txt", "a");
+    if (!arquivo) {
+         printf ("Erro na abertura do arquivo. Fim de programa.");
+         exit (1);
+    }
+    fprintf(arquivo, "\n------------------------", paciente->nome);
+    fprintf(arquivo, "\n %s", paciente->nome);
+    fprintf(arquivo, "\n %d", paciente->telefone);
+    fclose(arquivo);
+}
 
 void main(){
 
+    FILE *fp;
     Fila fila;
     inicializaFila(&fila);
-    int telefone, grauUrgencia; char nome[50];
+    int telefone, grauUrgencia; char nome[50]; PONT paciente;
     int opcao;
 
     do{
@@ -116,7 +128,7 @@ void main(){
             printf("\n*   1. CADASTRAR PACIENTE           *");
             printf("\n*   2. BUSCAR PACIENTE              *");
             printf("\n*   3. PROXIMO PACIENTE             *");
-            printf("\n*   4. VERIFICAR TAMANHO DA LISTA   *");
+            printf("\n*   4. VERIFICAR TAMANHO DA FILA    *");
             printf("\n*   0. SAIR                         *");
             printf("\n*                                   *");
             printf("\n*************************************\n");
@@ -142,7 +154,8 @@ void main(){
                 }
             break;
             case 3:
-                proximoLista(&fila);
+                paciente = proximoLista(&fila);
+                escreverArquivo(paciente, fp);
                 removerDaFila(&fila);
                 exibirFila(&fila);
             break;
@@ -150,5 +163,6 @@ void main(){
                 printf("Tamanho da fila: %d", fila.quantidade);
             break;
         }
+
     }while(opcao != 0);
 }
