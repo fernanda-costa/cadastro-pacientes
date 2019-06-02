@@ -152,8 +152,11 @@ void main(){
                 scanf("%s", &nome);
                 printf("Insira o telefone do paciente: ");
                 scanf("%d", &telefone);
-                printf("Insira o grau de urgencia do paciente: ");
-                scanf("%d", &grauUrgencia);
+                do{
+                    printf("Insira o grau de urgencia do paciente: ");
+                    scanf("%d", &grauUrgencia);
+                }while(grauUrgencia < 1 || grauUrgencia > 6);
+
                 cadastrarPaciente(&fila, nome, telefone, grauUrgencia);
                 exibirFila(&fila);
             break;
