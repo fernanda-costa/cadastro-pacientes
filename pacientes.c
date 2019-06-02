@@ -37,12 +37,14 @@ void exibirFila(Fila *fila){
     PONT paciente = fila->inicio;
     while(paciente != NULL){
         printf("\nNome: %s", paciente->nome);
+        printf("\nGrau de urgencia: %d", paciente->grauUrgencia);
         paciente = paciente->prox;
     }
 }
 
 void cadastrarPaciente(Fila *fila, char *nome, int telefone, int grauUrgencia){
     PONT paciente = criaPaciente();
+    PONT aux, anterior;
     strcpy(paciente->nome, nome);
     paciente->grauUrgencia = grauUrgencia;
     paciente->telefone = telefone;
@@ -51,9 +53,18 @@ void cadastrarPaciente(Fila *fila, char *nome, int telefone, int grauUrgencia){
     if(fila->inicio == NULL){
         fila->inicio = paciente;
     } else {
-        fila->fim->prox = paciente;
+        if(fila->inicio->grauUrgencia < paciente->grauUrgencia){
+            paciente->prox = fila->inicio;
+            fila->inicio = paciente;
+        } else {
+            aux = fila->inicio;
+            while(aux->prox != NULL && aux->prox->grauUrgencia > paciente->grauUrgencia){
+                aux = aux->prox;
+            }
+            paciente->prox = aux->prox;
+            aux->prox = paciente;
+        }
     }
-    fila->fim = paciente;
     fila->quantidade++;
 }
 void removerDaFila(Fila *fila){
